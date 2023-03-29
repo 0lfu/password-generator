@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="wrapper">
+        <div id="main">
+            <div id="title">
+                <p><b>Password Generator</b></p>
+            </div>
+            <div id="output">
+                <input type="text" id="password" readonly>
+                <div id="strength">
+                    <div class="level"></div>
+                    <div class="level"></div>
+                    <div class="level"></div>
+                    <div class="level"></div>
+                </div>
+            </div>
+            <div id="settings">
+                <div id="lengthSlider">
+                    <input type="range" id="length" min="1" max="32" value="6">
+                    <span id="lengthValue">6</span>
+                </div>
+                <div class="charSet">
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="optionName">Lower case</span>
+                </div>
+                <div class="charSet">
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="optionName">Upper case</span>
+                </div>
+                <div class="charSet">
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="optionName">Numbers</span>
+                </div>
+                <div class="charSet">
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="optionName">Symbols</span>
+                </div>
+            </div>
+            <div id="generate">
+                <button id="generateBtn">Generate</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const slider = document.getElementById("length");
+        const output = document.getElementById("lengthValue");
+        output.innerHTML = slider.value;
+        slider.oninput = function() {
+          output.innerHTML = this.value;
+        }
+
+        const passwordOutput = document.getElementById("password");
+        const lengthInput = document.getElementById("length");
+        const lengthValue = document.getElementById("lengthValue");
+        const lowerCaseCheckbox = document.querySelectorAll(".charSet input")[0];
+        const upperCaseCheckbox = document.querySelectorAll(".charSet input")[1];
+        const numbersCheckbox = document.querySelectorAll(".charSet input")[2];
+        const symbolsCheckbox = document.querySelectorAll(".charSet input")[3];
+        const generateButton = document.getElementById("generateBtn");
+        const strengthLevels = document.querySelectorAll(".level");
+    
+        const lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
+        const upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const numberChars = "0123456789";
+        const symbolChars = "!@#$%^&*()_-+={}[];:'\"\\|<>,.?/";
+    
+        function generatePassword() {
+            let password = "";
+            let charSet = "";
+            if (lowerCaseCheckbox.checked) charSet += lowerCaseChars;
+            if (upperCaseCheckbox.checked) charSet += upperCaseChars;
+            if (numbersCheckbox.checked) charSet += numberChars;
+            if (symbolsCheckbox.checked) charSet += symbolChars;
+            if (charSet === "") return "";
+            for (let i = 0; i < lengthInput.value; i++) {
+                password += charSet.charAt(Math.floor(Math.random() * charSet.length));
+            }
+            return password;
+        }
+
+        function updateStrength(password) {
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (password.length >= 10) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[!@#$%^&*()_\-+={}[\];:'"\\|<>,.?/]/)) strength++;
+            strength = Math.ceil(strength / 2);
+            for (let i = 0; i < strengthLevels.length; i++) {
+                if (i < strength) {
+                    strengthLevels[i].classList.add("active");
+                } else {
+                    strengthLevels[i].classList.remove("active");
+                }
+            }
+            const levelItem = document.querySelectorAll(".level");
+            levelItem.forEach(element => {
+                if(strength==1) element.style.backgroundColor = "#a30000";
+                else if(strength==2) element.style.backgroundColor = "#e0a458"; 
+                else if(strength==3) element.style.backgroundColor = "#b1dd5a";
+                else if(strength==4) element.style.backgroundColor = "#23ce6b";
+            });
+        }
+
+        function generateAndUpdatePassword() {
+            let password = generatePassword();
+            passwordOutput.value = password;
+            updateStrength(password);
+        }
+    
+        lengthInput.addEventListener("input", () => {
+            lengthValue.textContent = lengthInput.value;
+        });
+    
+        function copyPassword() {
+            // Change the background of passwordOutput to check.png
+            passwordOutput.style.background = "url('check.png') no-repeat calc(100% - 10px) center/auto 50%";
+            navigator.clipboard.writeText(passwordOutput.value);
+            setTimeout(function() {
+                passwordOutput.style.background = "url('content-copy.png') no-repeat calc(100% - 10px) center/auto 50%";
+            }, 1000);
+        }
+
+
+        generateButton.addEventListener("click", generateAndUpdatePassword);
+        lowerCaseCheckbox.addEventListener("click", generateAndUpdatePassword);
+        upperCaseCheckbox.addEventListener("click", generateAndUpdatePassword);
+        numbersCheckbox.addEventListener("click", generateAndUpdatePassword);
+        symbolsCheckbox.addEventListener("click", generateAndUpdatePassword);
+        lengthInput.addEventListener("input", generateAndUpdatePassword);
+        passwordOutput.addEventListener("click", copyPassword)
+        generateAndUpdatePassword();
+    </script>
+    
+</body>
+</html>
